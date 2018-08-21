@@ -31,7 +31,6 @@ if [ "$AUTO_DOCKER" == "yes" ]; then
 elif [ "$BATCH_MODE" == "yes" ]; then
       # Batch mode
       echo "Installing the script in batch mode. Please make sure $DBTYPE is up and running."
-      exit
 else
     prompt_db_type
 fi
