@@ -555,3 +555,11 @@ function start_local_mysql_db_server() {
 function stop_local_mysql_db_server() {
     sudo service mysql stop
 }
+
+# Added for BATCH_MODE. 
+function modify_allowed_hosts() {
+    if [ "$BATCH_MODE" == "yes" ]; then
+       sed -i "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = $ALLOWED_HOSTS/g" dojo/settings/settings.py
+    fi
+}
+
