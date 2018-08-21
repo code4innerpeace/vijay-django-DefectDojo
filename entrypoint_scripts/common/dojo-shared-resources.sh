@@ -219,17 +219,8 @@ function prompt_db_type() {
 function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    # Added BATCH_MODE condition.
-    if [ "$AUTO_DOCKER" != "yes" ] || [ "$BATCH_MODE" != "yes" ]; then
-        # Run interactively
-        read -p "MySQL host: " SQLHOST
-        read -p "MySQL port: " SQLPORT
-        read -p "MySQL user (should already exist): " SQLUSER
-        stty -echo
-        read -p "Password for user: " SQLPWD; echo
-        stty echo
-        read -p "Database name (should NOT exist): " DBNAME
-    else
+    # Added BATCH_MODE condition And rewriting old negate logic.
+    if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
         # Default values for a automated Docker install if not provided
         echo "Setting values for MySQL install"
         if [ -z "$SQLHOST" ]; then
@@ -247,6 +238,15 @@ function ensure_mysql_application_db() {
         if [ -z "$DBNAME" ]; then
             DBNAME="dojodb"
         fi
+    else
+        # Run interactively
+        read -p "MySQL host: " SQLHOST
+        read -p "MySQL port: " SQLPORT
+        read -p "MySQL user (should already exist): " SQLUSER
+        stty -echo
+        read -p "Password for user: " SQLPWD; echo
+        stty echo
+        read -p "Database name (should NOT exist): " DBNAME
     fi
 
     if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
@@ -556,7 +556,7 @@ function stop_local_mysql_db_server() {
     sudo service mysql stop
 }
 
-# Added for BATCH_MODE. 
+# Added for BATCH_MODE.
 function modify_allowed_hosts() {
     if [ "$BATCH_MODE" == "yes" ]; then
        sed -i "s/ALLOWED_HOSTS = \[]/ALLOWED_HOSTS = $ALLOWED_HOSTS/g" dojo/settings/settings.py
