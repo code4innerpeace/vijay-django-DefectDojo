@@ -328,7 +328,7 @@ function ensure_postgres_application_db() {
         else
             read -p "Drop database $DBNAME? [Y/n] " DELETE
         fi
-        
+
         if [[ ! $DELETE =~ ^[nN]$ ]]; then
             PGPASSWORD=$SQLPWD dropdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
             PGPASSWORD=$SQLPWD createdb $DBNAME -h $SQLHOST -p $SQLPORT -U $SQLUSER
@@ -515,23 +515,13 @@ function install_app(){
     python manage.py makemigrations --merge --noinput
     python manage.py migrate
 
-    if [ "$VENV_ACTIVE" == "0" ]; then
-        # If a virtualenv is active...
-        echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-        tput sgr0
-        python manage.py createsuperuser
+    if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
+      python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
+      docker/setup-superuser.expect
     else
-        # Allow script to be called non-interactively using:
-        # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-        if [ "$AUTO_DOCKER" != "yes" ]; then
-            echo -e "${GREEN}${BOLD}Create Dojo superuser:"
-            tput sgr0
-            python manage.py createsuperuser
-        else
-            # non-interactively setup the superuser
-            python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
-            docker/setup-superuser.expect
-        fi
+      echo -e "${GREEN}${BOLD}Create Dojo superuser:"
+      tput sgr0
+      python manage.py createsuperuser
     fi
 
     python manage.py loaddata product_type
