@@ -10,13 +10,14 @@ function help() {
     echo "$0 usage:"
     echo "  -h      Display this help message and exit with a status code of 0"
     echo "  -y      Disable interactivity (i.e. useful for Dockerfile usage)"
+    echo "  -b      Batch mode (i.e useful for automation purpose)"
     echo ""
 }
 
 TARGET_DIR=
 AUTO_DOCKER=
 
-while getopts 'hry' opt; do
+while getopts 'hryb' opt; do
     case $opt in
         h)
             help
@@ -24,6 +25,9 @@ while getopts 'hry' opt; do
             ;;
         y)
             AUTO_DOCKER="yes"
+            ;;
+        b)
+            BATCH_MODE="yes"
             ;;
         ?)
             help
@@ -215,7 +219,8 @@ function prompt_db_type() {
 function ensure_mysql_application_db() {
     # Allow script to be called non-interactively using:
     # export AUTO_DOCKER=yes && /opt/django-DefectDojo/setup.bash
-    if [ "$AUTO_DOCKER" != "yes" ]; then
+    # Added BATCH_MODE condition.
+    if [ "$AUTO_DOCKER" != "yes" ] || [ "$BATCH_MODE" != "yes" ]; then
         # Run interactively
         read -p "MySQL host: " SQLHOST
         read -p "MySQL port: " SQLPORT
@@ -247,7 +252,8 @@ function ensure_mysql_application_db() {
     if mysql -fs --protocol=TCP -h "$SQLHOST" -P "$SQLPORT" -u"$SQLUSER" -p"$SQLPWD" "$DBNAME" >/dev/null 2>&1 </dev/null; then
         echo "Database $DBNAME already exists!"
         echo
-        if [ "$AUTO_DOCKER" == "yes" ]; then
+        # Added BATCH_MODE condition
+        if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
             if [ -z "$FLUSHDB" ]; then
                 DELETE="yes"
             else
@@ -363,7 +369,7 @@ function install_db() {
             sudo yum install mariadb-server mysql-devel
         elif [ "$DBTYPE" == $POSTGRES ]; then
             echo "Installing Postgres client (and server if not already installed)"
-            sudo yum install postgresql-devel postgresql postgresql-contrib 
+            sudo yum install postgresql-devel postgresql postgresql-contrib
         fi
     elif [[ ! -z "$APT_GET_CMD" ]]; then
         if [ "$DBTYPE" == $MYSQL ]; then
