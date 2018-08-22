@@ -516,7 +516,7 @@ function install_app(){
     python manage.py migrate
 
     if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
-      python manage.py createsuperuser --noinput --username=admin --email='ed@example.com'
+      python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='ed@example.com'
       docker/setup-superuser.expect
     else
       echo -e "${GREEN}${BOLD}Create Dojo superuser:"
