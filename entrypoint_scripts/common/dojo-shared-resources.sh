@@ -517,7 +517,7 @@ function install_app(){
 
     if [ "$AUTO_DOCKER" == "yes" ] || [ "$BATCH_MODE" == "yes" ]; then
       python manage.py createsuperuser --noinput --username=$DEFECTDOJO_ADMIN_USER --email='ed@example.com'
-      docker/setup-superuser.expect
+      docker/setup-superuser.expect $DEFECTDOJO_ADMIN_USER $DEFECTDOJO_ADMIN_PASSWORD
     else
       echo -e "${GREEN}${BOLD}Create Dojo superuser:"
       tput sgr0
